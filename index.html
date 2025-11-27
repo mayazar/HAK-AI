@@ -524,898 +524,868 @@ button.small {
   <!-- jsPDF -->
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-  <script>
-    const STORAGE_KEY_RECORDS = "aiRubricStudents";
-    const STORAGE_KEY_STATE = "aiRubricCurrentState";
+<script>
+  const STORAGE_KEY_RECORDS = "aiRubricStudents";
+  const STORAGE_KEY_STATE = "aiRubricCurrentState";
 
-    const criteriaData = [
-      { id: "crit1", name: "חשיבה ביקורתית והערכת מהימנות", max: 25,
-        desc: "בדיקת מהימנות המידע, הצלבה בין מקורות ושילוב שיקול דעת עצמאי.",
-        levels: [
-          { label: "מעולה", points: 25 },
-          { label: "טוב", points: 20 },
-          { label: "מספק", points: 15 },
-          { label: "לא מספק", points: 10 }
-        ]
-      },
-      { id: "crit2", name: "איכות התוכן והעומק האקדמי", max: 20,
-        desc: "עומק הדיון, דיוק מושגים ושילוב מקורות רלוונטיים.",
-        levels: [
-          { label: "מעולה", points: 20 },
-          { label: "טוב", points: 16 },
-          { label: "מספק", points: 10 },
-          { label: "לא מספק", points: 5 }
-        ]
-      },
-      { id: "crit3", name: "שקיפות בשימוש בכלי בינה מלאכותית", max: 10,
-        desc: "מידת הדיווח על השימוש בכלי, תיעוד ושיתוף המורה.",
-        levels: [
-          { label: "מעולה", points: 10 },
-          { label: "טוב", points: 8 },
-          { label: "מספק", points: 6 },
-          { label: "לא מספק", points: 3 }
-        ]
-      },
-      { id: "crit4", name: "עריכה ושיפור המוצר", max: 12,
-        desc: "התאמת הטקסט לשפה אישית, שכתוב, תיקונים והרחבה.",
-        levels: [
-          { label: "מעולה", points: 12 },
-          { label: "טוב", points: 9 },
-          { label: "מספק", points: 6 },
-          { label: "לא מספק", points: 3 }
-        ]
-      },
-      { id: "crit5", name: "מבנה ועמידה בדרישות", max: 15,
-        desc: "עמידה בהנחיות, סדר פנימי, חלוקה לפרקים ודרישות פורמליות.",
-        levels: [
-          { label: "מעולה", points: 15 },
-          { label: "טוב", points: 11 },
-          { label: "מספק", points: 8 },
-          { label: "לא מספק", points: 4 }
-        ]
-      },
-      { id: "crit6", name: "פרזנטציה והצגה", max: 18,
-        desc: "אופן ההצגה בעל פה או במצגת: עמידה מול קהל, עיצוב ושימוש במדיה.",
-        levels: [
-          { label: "מעולה", points: 18 },
-          { label: "טוב", points: 14 },
-          { label: "מספק", points: 10 },
-          { label: "לא מספק", points: 6 }
-        ]
-      }
-    ];
-
-    let currentTotalScore = 0;
-    let studentRecords = [];
-    let currentFilterClass = "";
-    let currentFilterTrack = "";
-
-    const criteriaContainer = document.getElementById("criteria-container");
-    const studentScalesContainer = document.getElementById("student-scales");
-    const studentsTbody = document.getElementById("students-tbody");
-    const saveMessage = document.getElementById("save-message");
-    const filterClassSelect = document.getElementById("filter-class");
-    const filterTrackSelect = document.getElementById("filter-track");
-    const statsSummaryEl = document.getElementById("stats-summary");
-    const selectedAvgBtn = document.getElementById("selected-avg-btn");
-    const selectedAvgSummaryEl = document.getElementById("selected-avg-summary");
-	const selectedAvgBtn = document.getElementById("selected-avg-btn");
-const selectedAvgSummaryEl = document.getElementById("selected-avg-summary");
-
-    const teacherBtn = document.getElementById("role-teacher");
-    const studentBtn = document.getElementById("role-student");
-    const teacherView = document.getElementById("teacher-view");
-    const studentView = document.getElementById("student-view");
-
-    function levelFromScore(score) {
-      if (score >= 90) return "מעולה";
-      if (score >= 80) return "טוב";
-      if (score >= 70) return "מספק";
-      return "לא מספק";
+  const criteriaData = [
+    {
+      id: "crit1",
+      name: "חשיבה ביקורתית והערכת מהימנות",
+      max: 25,
+      desc: "בדיקת מהימנות המידע, הצלבה בין מקורות ושילוב שיקול דעת עצמאי.",
+      levels: [
+        { label: "מעולה", points: 25 },
+        { label: "טוב", points: 20 },
+        { label: "מספק", points: 15 },
+        { label: "לא מספק", points: 10 }
+      ]
+    },
+    {
+      id: "crit2",
+      name: "איכות התוכן והעומק האקדמי",
+      max: 20,
+      desc: "עומק הדיון, דיוק מושגים ושילוב מקורות רלוונטיים.",
+      levels: [
+        { label: "מעולה", points: 20 },
+        { label: "טוב", points: 16 },
+        { label: "מספק", points: 10 },
+        { label: "לא מספק", points: 5 }
+      ]
+    },
+    {
+      id: "crit3",
+      name: "שקיפות בשימוש בכלי בינה מלאכותית",
+      max: 10,
+      desc: "מידת הדיווח על השימוש בכלי, תיעוד ושיתוף המורה.",
+      levels: [
+        { label: "מעולה", points: 10 },
+        { label: "טוב", points: 8 },
+        { label: "מספק", points: 6 },
+        { label: "לא מספק", points: 3 }
+      ]
+    },
+    {
+      id: "crit4",
+      name: "עריכה ושיפור המוצר",
+      max: 12,
+      desc: "התאמת הטקסט לשפה אישית, שכתוב, תיקונים והרחבה.",
+      levels: [
+        { label: "מעולה", points: 12 },
+        { label: "טוב", points: 9 },
+        { label: "מספק", points: 6 },
+        { label: "לא מספק", points: 3 }
+      ]
+    },
+    {
+      id: "crit5",
+      name: "מבנה ועמידה בדרישות",
+      max: 15,
+      desc: "עמידה בהנחיות, סדר פנימי, חלוקה לפרקים ודרישות פורמליות.",
+      levels: [
+        { label: "מעולה", points: 15 },
+        { label: "טוב", points: 11 },
+        { label: "מספק", points: 8 },
+        { label: "לא מספק", points: 4 }
+      ]
+    },
+    {
+      id: "crit6",
+      name: "פרזנטציה והצגה",
+      max: 18,
+      desc: "אופן ההצגה בעל פה או במצגת: עמידה מול קהל, עיצוב ושימוש במדיה.",
+      levels: [
+        { label: "מעולה", points: 18 },
+        { label: "טוב", points: 14 },
+        { label: "מספק", points: 10 },
+        { label: "לא מספק", points: 6 }
+      ]
     }
-
-    // טבלת הקריטריונים למורה
-    criteriaData.forEach(crit => {
-      const row = document.createElement("div");
-      row.className = "criteria-grid";
-      row.dataset.critId = crit.id;
-
-      const colName = document.createElement("div");
-      colName.innerHTML = `
-        <div class="criteria-name">${crit.name} <span style="font-size:0.8rem; color:#999;">(עד ${crit.max} נקודות)</span></div>
-        <div class="criteria-desc">${crit.desc}</div>
-      `;
-
-      const colSelect = document.createElement("div");
-      const select = document.createElement("select");
-      select.dataset.critId = crit.id;
-      const defOpt = document.createElement("option");
-      defOpt.value = "";
-      defOpt.textContent = "בחרי רמת ביצוע";
-      select.appendChild(defOpt);
-      crit.levels.forEach((level, index) => {
-        const opt = document.createElement("option");
-        opt.value = index;
-        opt.textContent = `${level.label} (${level.points} נקודות)`;
-        select.appendChild(opt);
-      });
-      colSelect.appendChild(select);
-
-      const colPoints = document.createElement("div");
-      const pointsSpan = document.createElement("span");
-      pointsSpan.id = `points-${crit.id}`;
-      pointsSpan.textContent = "0";
-      colPoints.appendChild(pointsSpan);
-
-      row.appendChild(colName);
-      row.appendChild(colSelect);
-      row.appendChild(colPoints);
-
-      criteriaContainer.appendChild(row);
-    });
-
-    function calculateTotal(noSave) {
-      let sum = 0;
-      let filled = 0;
-      criteriaData.forEach(crit => {
-        const select = document.querySelector(`select[data-crit-id="${crit.id}"]`);
-        const pointsSpan = document.getElementById(`points-${crit.id}`);
-        if (select && select.value !== "") {
-          const level = crit.levels[Number(select.value)];
-          pointsSpan.textContent = level.points;
-          sum += level.points;
-          filled++;
-        } else {
-          pointsSpan.textContent = "0";
-        }
-      });
-
-      currentTotalScore = sum;
-
-      const totalEl = document.getElementById("total-score");
-      const levelEl = document.getElementById("overall-level");
-      const commentEl = document.getElementById("overall-comment");
-
-      totalEl.textContent = sum;
-
-      if (filled === 0) {
-        levelEl.textContent = "טרם הוזנו נתונים";
-        commentEl.textContent = "";
-      } else {
-        let level;
-        let comment;
-
-        if (sum >= 90) {
-          level = "מעולה";
-          comment = "עבודה ברמה גבוהה מאוד. ניתן להשתמש בה כמודל ולהעמיק עוד מעט במקומות נקודתיים.";
-        } else if (sum >= 80) {
-          level = "טוב";
-          comment = "עבודה טובה ומוקפדת. מומלץ לבחור קריטריון או שניים לשיפור נוסף.";
-        } else if (sum >= 70) {
-          level = "מספק";
-          comment = "עבודה שמראה מאמץ, אך נדרשים חיזוק והעמקה בכמה תחומים.";
-        } else {
-          level = "לא מספק";
-          comment = "העבודה אינה עומדת בסטנדרט הרצוי. כדאי לחזור להנחיות ולחזק את החשיבה העצמאית.";
-        }
-
-        levelEl.textContent = level;
-        commentEl.textContent = comment;
-      }
-
-      if (!noSave) {
-        saveCurrentState();
-      }
-    }
-
-    criteriaContainer.addEventListener("change", event => {
-      if (event.target.tagName === "SELECT") {
-        calculateTotal();
-      }
-    });
-
-    // סרגלים לתלמיד
-    const studentScaleTexts = [
-      "אני בודק או בודקת את אמינות המידע ולא מסתפקת בתשובה הראשונה.",
-      "אני משתמשת במקורות נוספים ולא רק בכלי הבינה.",
-      "אני מציינת בעבודה מתי וכיצד השתמשתי בכלי.",
-      "אני עורכת ומשפרת את הטקסט כך שיישמע כמו שפה שלי.",
-      "אני מקפידה לעמוד בהנחיות המבנה והדרישות של המורה.",
-      "אם יש פרזנטציה, אני מתכוננת אליה ולא קוראת מהמסך בלבד."
-    ];
-
-    criteriaData.forEach((crit, index) => {
-      const row = document.createElement("div");
-      row.className = "student-scale";
-
-      const textCol = document.createElement("div");
-      textCol.innerHTML = `
-        <div class="criteria-name">${crit.name}</div>
-        <div class="criteria-desc">${studentScaleTexts[index] || ""}</div>
-      `;
-
-      const controlCol = document.createElement("div");
-      const range = document.createElement("input");
-      range.type = "range";
-      range.min = "1";
-      range.max = "5";
-      range.step = "1";
-      range.value = "3";
-      range.dataset.critId = crit.id;
-
-      const valueLabel = document.createElement("div");
-      valueLabel.className = "range-value";
-      valueLabel.id = `student-val-${crit.id}`;
-      valueLabel.textContent = "3 - בינוני";
-
-      controlCol.appendChild(range);
-      controlCol.appendChild(valueLabel);
-
-      row.appendChild(textCol);
-      row.appendChild(controlCol);
-
-      studentScalesContainer.appendChild(row);
-    });
-
-    function interpretScaleValue(val) {
-      const v = Number(val);
-      if (v === 5) return "5 - מצוין";
-      if (v === 4) return "4 - טוב";
-      if (v === 3) return "3 - בינוני";
-      if (v === 2) return "2 - נמוך";
-      return "1 - נמוך מאוד";
-    }
-
-    function updateStudentAverage(noSave) {
-      const ranges = studentScalesContainer.querySelectorAll('input[type="range"]');
-      let sum = 0;
-      ranges.forEach(r => sum += Number(r.value));
-      const avg = ranges.length ? (sum / ranges.length) : 0;
-      document.getElementById("student-average").textContent = avg.toFixed(1);
-
-      let interpretation;
-      if (avg >= 4.5) {
-        interpretation = "נראה שהעבודה מוכנה מאוד להגשה. כדאי לעבור רק על תיקונים קטנים.";
-      } else if (avg >= 3.5) {
-        interpretation = "הכיוון טוב, אך יש כמה נקודות שדורשות חיזוק ושיפור לפני ההגשה.";
-      } else if (avg >= 2.5) {
-        interpretation = "יש צורך בשיפור משמעותי בחלק מהקריטריונים. מומלץ לעבור שוב על הטיפים.";
-      } else {
-        interpretation = "נדרש שדרוג רציני של העבודה. כדאי לבחור קריטריון אחד ולשפר אותו, ואז להמשיך.";
-      }
-
-      document.getElementById("student-interpretation").textContent = interpretation;
-
-      if (!noSave) {
-        saveCurrentState();
-      }
-    }
-
-    studentScalesContainer.addEventListener("input", event => {
-      if (event.target.type === "range") {
-        const critId = event.target.dataset.critId;
-        const label = document.getElementById(`student-val-${critId}`);
-        label.textContent = interpretScaleValue(event.target.value);
-        updateStudentAverage();
-      }
-    });
-
-    updateStudentAverage(true);
-
-    // מעבר מורה/תלמיד
-    function setRole(role, noSave) {
-      if (role === "teacher") {
-        teacherBtn.classList.add("active");
-        studentBtn.classList.remove("active");
-        teacherView.style.display = "";
-        studentView.style.display = "none";
-      } else {
-        studentBtn.classList.add("active");
-        teacherBtn.classList.remove("active");
-        studentView.style.display = "";
-        teacherView.style.display = "none";
-      }
-      if (!noSave) {
-        saveCurrentState();
-      }
-    }
-
-    teacherBtn.addEventListener("click", () => setRole("teacher"));
-    studentBtn.addEventListener("click", () => setRole("student"));
-
-    document.getElementById("export-pdf-btn").addEventListener("click", () => {
-      window.print();
-    });
-
-    // רשימת תלמידים
-    function loadRecordsFromStorage() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY_RECORDS);
-        if (!raw) {
-          studentRecords = [];
-          return;
-        }
-        const parsed = JSON.parse(raw);
-        studentRecords = Array.isArray(parsed) ? parsed : [];
-      } catch {
-        studentRecords = [];
-      }
-    }
-
-    function saveRecordsToStorage() {
-      localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(studentRecords));
-    }
-
-    function getFilteredRecords() {
-      return studentRecords.filter(rec => {
-        const classOk = !currentFilterClass || rec.className === currentFilterClass;
-        const trackOk = !currentFilterTrack || rec.track === currentFilterTrack;
-        return classOk && trackOk;
-      });
-    }
-
-    function buildFilterOptions() {
-      const classesSet = new Set();
-      const tracksSet = new Set();
-
-      studentRecords.forEach(rec => {
-        if (rec.className) classesSet.add(rec.className);
-        if (rec.track) tracksSet.add(rec.track);
-      });
-
-      const oldClass = currentFilterClass;
-      const oldTrack = currentFilterTrack;
-
-      filterClassSelect.innerHTML = "";
-      const defClass = document.createElement("option");
-      defClass.value = "";
-      defClass.textContent = "כל הכיתות";
-      filterClassSelect.appendChild(defClass);
-      Array.from(classesSet).sort().forEach(cls => {
-        const opt = document.createElement("option");
-        opt.value = cls;
-        opt.textContent = cls;
-        filterClassSelect.appendChild(opt);
-      });
-
-      filterTrackSelect.innerHTML = "";
-      const defTrack = document.createElement("option");
-      defTrack.value = "";
-      defTrack.textContent = "כל המגמות";
-      filterTrackSelect.appendChild(defTrack);
-      Array.from(tracksSet).sort().forEach(trk => {
-        const opt = document.createElement("option");
-        opt.value = trk;
-        opt.textContent = trk;
-        filterTrackSelect.appendChild(opt);
-      });
-
-      if (oldClass && classesSet.has(oldClass)) {
-        currentFilterClass = oldClass;
-        filterClassSelect.value = oldClass;
-      } else {
-        currentFilterClass = "";
-        filterClassSelect.value = "";
-      }
-
-      if (oldTrack && tracksSet.has(oldTrack)) {
-        currentFilterTrack = oldTrack;
-        filterTrackSelect.value = oldTrack;
-      } else {
-        currentFilterTrack = "";
-        filterTrackSelect.value = "";
-      }
-    }
-
-    function updateStatsSummary(filtered) {
-      if (!filtered.length) {
-        statsSummaryEl.textContent = "אין תלמידים תואמי סינון להצגה.";
-        return;
-      }
-
-      let sum = 0;
-      let min = Infinity;
-      let max = -Infinity;
-
-      filtered.forEach(rec => {
-        const s = Number(rec.score) || 0;
-        sum += s;
-        if (s < min) min = s;
-        if (s > max) max = s;
-      });
-
-      const avg = sum / filtered.length;
-
-      let context = "כל התלמידים";
-      if (currentFilterClass && currentFilterTrack) {
-        context = `כיתה ${currentFilterClass}, מגמה ${currentFilterTrack}`;
-      } else if (currentFilterClass) {
-        context = `כיתה ${currentFilterClass}`;
-      } else if (currentFilterTrack) {
-        context = `מגמה ${currentFilterTrack}`;
-      }
-
-      statsSummaryEl.textContent =
-        `הקשר: ${context}. מספר תלמידים: ${filtered.length}. ממוצע ציון: ${avg.toFixed(1)}. ` +
-        `ציון גבוה: ${max}. ציון נמוך: ${min}.`;
-    }
-	
-function escapeForCSV(value) {
-  if (value == null) return "";
-  const str = String(value).replace(/"/g, '""');
-  return `"${str}"`;
-}
-
-    function renderRecordsTable() {
-      studentsTbody.innerHTML = "";
-
-      buildFilterOptions();
-      const filtered = getFilteredRecords();
-
-      if (!filtered.length) {
-        const tr = document.createElement("tr");
-        const td = document.createElement("td");
-        td.colSpan = 10;
-        td.textContent = "אין תלמידים להצגה.";
-        tr.appendChild(td);
-        studentsTbody.appendChild(tr);
-        updateStatsSummary(filtered);
-        return;
-      }
-
-filtered.forEach(rec => {
-  const tr = document.createElement("tr");
-  tr.dataset.id = rec.id;
-
-  // תא בחירה
-  const tdSelect = document.createElement("td");
-  const cb = document.createElement("input");
-  cb.type = "checkbox";
-  cb.className = "row-select";
-  cb.dataset.id = rec.id;
-  tdSelect.appendChild(cb);
-  tr.appendChild(tdSelect);
-
-  const tdName = document.createElement("td");
-  tdName.textContent = rec.name || "";
-  tr.appendChild(tdName);
-
-  const tdClass = document.createElement("td");
-  tdClass.textContent = rec.className || "";
-  tr.appendChild(tdClass);
-
-  const tdTrack = document.createElement("td");
-  tdTrack.textContent = rec.track || "כללי";
-  tr.appendChild(tdTrack);
-
-  const tdRole = document.createElement("td");
-  tdRole.textContent = rec.role || "";
-  tr.appendChild(tdRole);
-
-  const tdScore = document.createElement("td");
-  tdScore.textContent = rec.score != null ? rec.score : "";
-  tr.appendChild(tdScore);
-
-  const tdLevel = document.createElement("td");
-  tdLevel.textContent = levelFromScore(rec.score || 0);
-  tr.appendChild(tdLevel);
-
-  const tdDate = document.createElement("td");
-  tdDate.textContent = rec.date || "";
-  tr.appendChild(tdDate);
-
-  const tdNotes = document.createElement("td");
-  tdNotes.textContent = rec.notes || "";
-  tr.appendChild(tdNotes);
-
-  // תא מחיקה
-  const tdDelete = document.createElement("td");
-  const delBtn = document.createElement("button");
-  delBtn.textContent = "מחיקה";
-  delBtn.className = "danger small delete-student-btn";
-  delBtn.dataset.id = rec.id;
-  tdDelete.appendChild(delBtn);
-  tr.appendChild(tdDelete);
-
-  studentsTbody.appendChild(tr);
-});
-
-
-      updateStatsSummary(filtered);
-    }
-
-    loadRecordsFromStorage();
-    renderRecordsTable();
-	
-	// מחיקת תלמיד בודד
-studentsTbody.addEventListener("click", event => {
-  if (!event.target.classList.contains("delete-student-btn")) return;
-
-  const id = Number(event.target.dataset.id);
-  const rec = studentRecords.find(r => r.id === id);
-  const name = rec ? rec.name : "";
-  const ok = window.confirm(`למחוק את הרשומה של "${name || "תלמיד"}"?`);
-  if (!ok) return;
-
-  studentRecords = studentRecords.filter(r => r.id !== id);
-  saveRecordsToStorage();
-  renderRecordsTable();
-  saveMessage.textContent = "הרשומה נמחקה.";
-});
-
-selectedAvgBtn.addEventListener("click", () => {
-  const checked = Array.from(document.querySelectorAll(".row-select:checked"));
-  if (!checked.length) {
-    selectedAvgSummaryEl.textContent = "לא נבחרו תלמידים.";
-    return;
+  ];
+
+  let currentTotalScore = 0;
+  let studentRecords = [];
+  let currentFilterClass = "";
+  let currentFilterTrack = "";
+
+  const criteriaContainer = document.getElementById("criteria-container");
+  const studentScalesContainer = document.getElementById("student-scales");
+  const studentsTbody = document.getElementById("students-tbody");
+  const saveMessage = document.getElementById("save-message");
+  const filterClassSelect = document.getElementById("filter-class");
+  const filterTrackSelect = document.getElementById("filter-track");
+  const statsSummaryEl = document.getElementById("stats-summary");
+  const selectedAvgBtn = document.getElementById("selected-avg-btn");
+  const selectedAvgSummaryEl = document.getElementById("selected-avg-summary");
+
+  const teacherBtn = document.getElementById("role-teacher");
+  const studentBtn = document.getElementById("role-student");
+  const teacherView = document.getElementById("teacher-view");
+  const studentView = document.getElementById("student-view");
+
+  function levelFromScore(score) {
+    if (score >= 90) return "מעולה";
+    if (score >= 80) return "טוב";
+    if (score >= 70) return "מספק";
+    return "לא מספק";
   }
 
-  const ids = checked.map(cb => Number(cb.dataset.id));
-  const chosen = studentRecords.filter(r => ids.includes(r.id));
-  if (!chosen.length) {
-    selectedAvgSummaryEl.textContent = "לא נמצאו רשומות מתאימות.";
-    return;
-  }
+  // בניית המחוון למורה
+  criteriaData.forEach(crit => {
+    const row = document.createElement("div");
+    row.className = "criteria-grid";
+    row.dataset.critId = crit.id;
 
-  let sum = 0;
-  let min = Infinity;
-  let max = -Infinity;
+    const colName = document.createElement("div");
+    colName.innerHTML = `
+      <div class="criteria-name">${crit.name} <span style="font-size:0.8rem; color:#999;">(עד ${crit.max} נקודות)</span></div>
+      <div class="criteria-desc">${crit.desc}</div>
+    `;
 
-  chosen.forEach(rec => {
-    const s = Number(rec.score) || 0;
-    sum += s;
-    if (s < min) min = s;
-    if (s > max) max = s;
+    const colSelect = document.createElement("div");
+    const select = document.createElement("select");
+    select.dataset.critId = crit.id;
+    const defOpt = document.createElement("option");
+    defOpt.value = "";
+    defOpt.textContent = "בחרי רמת ביצוע";
+    select.appendChild(defOpt);
+    crit.levels.forEach((level, index) => {
+      const opt = document.createElement("option");
+      opt.value = index;
+      opt.textContent = `${level.label} (${level.points} נקודות)`;
+      select.appendChild(opt);
+    });
+    colSelect.appendChild(select);
+
+    const colPoints = document.createElement("div");
+    const pointsSpan = document.createElement("span");
+    pointsSpan.id = `points-${crit.id}`;
+    pointsSpan.textContent = "0";
+    colPoints.appendChild(pointsSpan);
+
+    row.appendChild(colName);
+    row.appendChild(colSelect);
+    row.appendChild(colPoints);
+
+    criteriaContainer.appendChild(row);
   });
 
-  const avg = sum / chosen.length;
-  selectedAvgSummaryEl.textContent =
-    `קבוצה מסומנת: ${chosen.length} תלמידים. ממוצע: ${avg.toFixed(1)}. גבוה: ${max}. נמוך: ${min}.`;
-});
+  function calculateTotal(noSave) {
+    let sum = 0;
+    let filled = 0;
+    criteriaData.forEach(crit => {
+      const select = document.querySelector(`select[data-crit-id="${crit.id}"]`);
+      const pointsSpan = document.getElementById(`points-${crit.id}`);
+      if (select && select.value !== "") {
+        const level = crit.levels[Number(select.value)];
+        pointsSpan.textContent = level.points;
+        sum += level.points;
+        filled++;
+      } else {
+        pointsSpan.textContent = "0";
+      }
+    });
 
+    currentTotalScore = sum;
 
-    document.getElementById("save-student-btn").addEventListener("click", () => {
-      const name = document.getElementById("student-name").value.trim();
-      const className = document.getElementById("student-class").value.trim();
-      const track = document.getElementById("student-track").value;
-      const role = document.getElementById("student-role").value;
-      const notes = document.getElementById("teacher-notes").value.trim();
+    const totalEl = document.getElementById("total-score");
+    const levelEl = document.getElementById("overall-level");
+    const commentEl = document.getElementById("overall-comment");
 
-      saveMessage.textContent = "";
+    totalEl.textContent = sum;
 
-      if (!name) {
-        saveMessage.textContent = "יש להזין שם תלמיד או תלמידה לפני השמירה.";
-        return;
+    if (filled === 0) {
+      levelEl.textContent = "טרם הוזנו נתונים";
+      commentEl.textContent = "";
+    } else {
+      let level;
+      let comment;
+
+      if (sum >= 90) {
+        level = "מעולה";
+        comment = "עבודה ברמה גבוהה מאוד. ניתן להשתמש בה כמודל ולהעמיק עוד מעט במקומות נקודתיים.";
+      } else if (sum >= 80) {
+        level = "טוב";
+        comment = "עבודה טובה ומוקפדת. מומלץ לבחור קריטריון או שניים לשיפור נוסף.";
+      } else if (sum >= 70) {
+        level = "מספק";
+        comment = "עבודה שמראה מאמץ, אך נדרשים חיזוק והעמקה בכמה תחומים.";
+      } else {
+        level = "לא מספק";
+        comment = "העבודה אינה עומדת בסטנדרט הרצוי. כדאי לחזור להנחיות ולחזק את החשיבה העצמאית.";
       }
 
-      let allSelected = true;
+      levelEl.textContent = level;
+      commentEl.textContent = comment;
+    }
+
+    if (!noSave) {
+      saveCurrentState();
+    }
+  }
+
+  criteriaContainer.addEventListener("change", event => {
+    if (event.target.tagName === "SELECT") {
+      calculateTotal();
+    }
+  });
+
+  // סרגלים לתלמיד
+  const studentScaleTexts = [
+    "אני בודק או בודקת את אמינות המידע ולא מסתפקת בתשובה הראשונה.",
+    "אני משתמשת במקורות נוספים ולא רק בכלי הבינה.",
+    "אני מציינת בעבודה מתי וכיצד השתמשתי בכלי.",
+    "אני עורכת ומשפרת את הטקסט כך שיישמע כמו שפה שלי.",
+    "אני מקפידה לעמוד בהנחיות המבנה והדרישות של המורה.",
+    "אם יש פרזנטציה, אני מתכוננת אליה ולא קוראת מהמסך בלבד."
+  ];
+
+  criteriaData.forEach((crit, index) => {
+    const row = document.createElement("div");
+    row.className = "student-scale";
+
+    const textCol = document.createElement("div");
+    textCol.innerHTML = `
+      <div class="criteria-name">${crit.name}</div>
+      <div class="criteria-desc">${studentScaleTexts[index] || ""}</div>
+    `;
+
+    const controlCol = document.createElement("div");
+    const range = document.createElement("input");
+    range.type = "range";
+    range.min = "1";
+    range.max = "5";
+    range.step = "1";
+    range.value = "3";
+    range.dataset.critId = crit.id;
+
+    const valueLabel = document.createElement("div");
+    valueLabel.className = "range-value";
+    valueLabel.id = `student-val-${crit.id}`;
+    valueLabel.textContent = "3 - בינוני";
+
+    controlCol.appendChild(range);
+    controlCol.appendChild(valueLabel);
+
+    row.appendChild(textCol);
+    row.appendChild(controlCol);
+
+    studentScalesContainer.appendChild(row);
+  });
+
+  function interpretScaleValue(val) {
+    const v = Number(val);
+    if (v === 5) return "5 - מצוין";
+    if (v === 4) return "4 - טוב";
+    if (v === 3) return "3 - בינוני";
+    if (v === 2) return "2 - נמוך";
+    return "1 - נמוך מאוד";
+  }
+
+  function updateStudentAverage(noSave) {
+    const ranges = studentScalesContainer.querySelectorAll('input[type="range"]');
+    let sum = 0;
+    ranges.forEach(r => sum += Number(r.value));
+    const avg = ranges.length ? (sum / ranges.length) : 0;
+    document.getElementById("student-average").textContent = avg.toFixed(1);
+
+    let interpretation;
+    if (avg >= 4.5) {
+      interpretation = "נראה שהעבודה מוכנה מאוד להגשה. כדאי לעבור רק על תיקונים קטנים.";
+    } else if (avg >= 3.5) {
+      interpretation = "הכיוון טוב, אך יש כמה נקודות שדורשות חיזוק ושיפור לפני ההגשה.";
+    } else if (avg >= 2.5) {
+      interpretation = "יש צורך בשיפור משמעותי בחלק מהקריטריונים. מומלץ לעבור שוב על הטיפים.";
+    } else {
+      interpretation = "נדרש שדרוג רציני של העבודה. כדאי לבחור קריטריון אחד ולשפר אותו, ואז להמשיך.";
+    }
+
+    document.getElementById("student-interpretation").textContent = interpretation;
+
+    if (!noSave) {
+      saveCurrentState();
+    }
+  }
+
+  studentScalesContainer.addEventListener("input", event => {
+    if (event.target.type === "range") {
+      const critId = event.target.dataset.critId;
+      const label = document.getElementById(`student-val-${critId}`);
+      label.textContent = interpretScaleValue(event.target.value);
+      updateStudentAverage();
+    }
+  });
+
+  updateStudentAverage(true);
+
+  // מורה / תלמיד
+  function setRole(role, noSave) {
+    if (role === "teacher") {
+      teacherBtn.classList.add("active");
+      studentBtn.classList.remove("active");
+      teacherView.style.display = "";
+      studentView.style.display = "none";
+    } else {
+      studentBtn.classList.add("active");
+      teacherBtn.classList.remove("active");
+      studentView.style.display = "";
+      teacherView.style.display = "none";
+    }
+    if (!noSave) {
+      saveCurrentState();
+    }
+  }
+
+  teacherBtn.addEventListener("click", () => setRole("teacher"));
+  studentBtn.addEventListener("click", () => setRole("student"));
+
+  // pdf דרך הדפדפן
+  document.getElementById("export-pdf-btn").addEventListener("click", () => {
+    window.print();
+  });
+
+  // רשימת תלמידים
+  function loadRecordsFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_RECORDS);
+      if (!raw) {
+        studentRecords = [];
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      studentRecords = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      studentRecords = [];
+    }
+  }
+
+  function saveRecordsToStorage() {
+    localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(studentRecords));
+  }
+
+  function getFilteredRecords() {
+    return studentRecords.filter(rec => {
+      const classOk = !currentFilterClass || rec.className === currentFilterClass;
+      const trackOk = !currentFilterTrack || rec.track === currentFilterTrack;
+      return classOk && trackOk;
+    });
+  }
+
+  function buildFilterOptions() {
+    const classesSet = new Set();
+    const tracksSet = new Set();
+
+    studentRecords.forEach(rec => {
+      if (rec.className) classesSet.add(rec.className);
+      if (rec.track) tracksSet.add(rec.track);
+    });
+
+    const oldClass = currentFilterClass;
+    const oldTrack = currentFilterTrack;
+
+    filterClassSelect.innerHTML = "";
+    const defClass = document.createElement("option");
+    defClass.value = "";
+    defClass.textContent = "כל הכיתות";
+    filterClassSelect.appendChild(defClass);
+    Array.from(classesSet).sort().forEach(cls => {
+      const opt = document.createElement("option");
+      opt.value = cls;
+      opt.textContent = cls;
+      filterClassSelect.appendChild(opt);
+    });
+
+    filterTrackSelect.innerHTML = "";
+    const defTrack = document.createElement("option");
+    defTrack.value = "";
+    defTrack.textContent = "כל המגמות";
+    filterTrackSelect.appendChild(defTrack);
+    Array.from(tracksSet).sort().forEach(trk => {
+      const opt = document.createElement("option");
+      opt.value = trk;
+      opt.textContent = trk;
+      filterTrackSelect.appendChild(opt);
+    });
+
+    if (oldClass && classesSet.has(oldClass)) {
+      currentFilterClass = oldClass;
+      filterClassSelect.value = oldClass;
+    } else {
+      currentFilterClass = "";
+      filterClassSelect.value = "";
+    }
+
+    if (oldTrack && tracksSet.has(oldTrack)) {
+      currentFilterTrack = oldTrack;
+      filterTrackSelect.value = oldTrack;
+    } else {
+      currentFilterTrack = "";
+      filterTrackSelect.value = "";
+    }
+  }
+
+  function updateStatsSummary(filtered) {
+    if (!filtered.length) {
+      statsSummaryEl.textContent = "אין תלמידים תואמי סינון להצגה.";
+      return;
+    }
+
+    let sum = 0;
+    let min = Infinity;
+    let max = -Infinity;
+
+    filtered.forEach(rec => {
+      const s = Number(rec.score) || 0;
+      sum += s;
+      if (s < min) min = s;
+      if (s > max) max = s;
+    });
+
+    const avg = sum / filtered.length;
+
+    let context = "כל התלמידים";
+    if (currentFilterClass && currentFilterTrack) {
+      context = `כיתה ${currentFilterClass}, מגמה ${currentFilterTrack}`;
+    } else if (currentFilterClass) {
+      context = `כיתה ${currentFilterClass}`;
+    } else if (currentFilterTrack) {
+      context = `מגמה ${currentFilterTrack}`;
+    }
+
+    statsSummaryEl.textContent =
+      `הקשר: ${context}. מספר תלמידים: ${filtered.length}. ממוצע ציון: ${avg.toFixed(1)}. ` +
+      `ציון גבוה: ${max}. ציון נמוך: ${min}.`;
+  }
+
+  function renderRecordsTable() {
+    studentsTbody.innerHTML = "";
+
+    buildFilterOptions();
+    const filtered = getFilteredRecords();
+
+    if (!filtered.length) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 10;
+      td.textContent = "אין תלמידים להצגה.";
+      tr.appendChild(td);
+      studentsTbody.appendChild(tr);
+      updateStatsSummary(filtered);
+      return;
+    }
+
+    filtered.forEach(rec => {
+      const tr = document.createElement("tr");
+      tr.dataset.id = rec.id;
+
+      const tdSelect = document.createElement("td");
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.className = "row-select";
+      cb.dataset.id = rec.id;
+      tdSelect.appendChild(cb);
+      tr.appendChild(tdSelect);
+
+      const tdName = document.createElement("td");
+      tdName.textContent = rec.name || "";
+      tr.appendChild(tdName);
+
+      const tdClass = document.createElement("td");
+      tdClass.textContent = rec.className || "";
+      tr.appendChild(tdClass);
+
+      const tdTrack = document.createElement("td");
+      tdTrack.textContent = rec.track || "כללי";
+      tr.appendChild(tdTrack);
+
+      const tdRole = document.createElement("td");
+      tdRole.textContent = rec.role || "";
+      tr.appendChild(tdRole);
+
+      const tdScore = document.createElement("td");
+      tdScore.textContent = rec.score != null ? rec.score : "";
+      tr.appendChild(tdScore);
+
+      const tdLevel = document.createElement("td");
+      tdLevel.textContent = levelFromScore(rec.score || 0);
+      tr.appendChild(tdLevel);
+
+      const tdDate = document.createElement("td");
+      tdDate.textContent = rec.date || "";
+      tr.appendChild(tdDate);
+
+      const tdNotes = document.createElement("td");
+      tdNotes.textContent = rec.notes || "";
+      tr.appendChild(tdNotes);
+
+      const tdDelete = document.createElement("td");
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "מחיקה";
+      delBtn.className = "danger small delete-student-btn";
+      delBtn.dataset.id = rec.id;
+      tdDelete.appendChild(delBtn);
+      tr.appendChild(tdDelete);
+
+      studentsTbody.appendChild(tr);
+    });
+
+    updateStatsSummary(filtered);
+  }
+
+  loadRecordsFromStorage();
+  renderRecordsTable();
+
+  document.getElementById("save-student-btn").addEventListener("click", () => {
+    const name = document.getElementById("student-name").value.trim();
+    const className = document.getElementById("student-class").value.trim();
+    const track = document.getElementById("student-track").value;
+    const role = document.getElementById("student-role").value;
+    const notes = document.getElementById("teacher-notes").value.trim();
+
+    saveMessage.textContent = "";
+
+    if (!name) {
+      saveMessage.textContent = "יש להזין שם תלמיד או תלמידה לפני השמירה.";
+      return;
+    }
+
+    let allSelected = true;
+    criteriaData.forEach(crit => {
+      const select = document.querySelector(`select[data-crit-id="${crit.id}"]`);
+      if (!select || select.value === "") {
+        allSelected = false;
+      }
+    });
+
+    if (!allSelected) {
+      saveMessage.textContent = "כדי לשמור תלמיד, יש לבחור רמת ביצוע בכל הקריטריונים.";
+      return;
+    }
+
+    if (currentTotalScore === 0) {
+      calculateTotal(true);
+    }
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("he-IL", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    });
+
+    const record = {
+      id: Date.now(),
+      name,
+      className,
+      track: track || "כללי",
+      role,
+      score: currentTotalScore,
+      date: dateStr,
+      notes
+    };
+
+    studentRecords.push(record);
+    saveRecordsToStorage();
+    renderRecordsTable();
+
+    saveMessage.textContent = "התלמיד נשמר בהצלחה.";
+
+    document.getElementById("student-name").value = "";
+    document.getElementById("student-class").value = "";
+    document.getElementById("teacher-notes").value = "";
+
+    saveCurrentState();
+  });
+
+  document.getElementById("clear-students-btn").addEventListener("click", () => {
+    if (!studentRecords.length) {
+      saveMessage.textContent = "אין רשומה למחיקה.";
+      return;
+    }
+    const confirmDelete = window.confirm("האם את בטוחה שברצונך למחוק את כל רשימת התלמידים?");
+    if (!confirmDelete) return;
+
+    studentRecords = [];
+    saveRecordsToStorage();
+    renderRecordsTable();
+    saveMessage.textContent = "כל הרשימה נמחקה.";
+  });
+
+  filterClassSelect.addEventListener("change", () => {
+    currentFilterClass = filterClassSelect.value;
+    renderRecordsTable();
+  });
+
+  filterTrackSelect.addEventListener("change", () => {
+    currentFilterTrack = filterTrackSelect.value;
+    renderRecordsTable();
+  });
+
+  // מחיקת תלמיד בודד
+  studentsTbody.addEventListener("click", event => {
+    if (!event.target.classList.contains("delete-student-btn")) return;
+    const id = Number(event.target.dataset.id);
+    const rec = studentRecords.find(r => r.id === id);
+    const name = rec ? rec.name : "";
+    const ok = window.confirm(`למחוק את הרשומה של "${name || "תלמיד"}"?`);
+    if (!ok) return;
+    studentRecords = studentRecords.filter(r => r.id !== id);
+    saveRecordsToStorage();
+    renderRecordsTable();
+    saveMessage.textContent = "הרשומה נמחקה.";
+  });
+
+  // ממוצע קבוצה מסומנת
+  selectedAvgBtn.addEventListener("click", () => {
+    const checked = Array.from(document.querySelectorAll(".row-select:checked"));
+    if (!checked.length) {
+      selectedAvgSummaryEl.textContent = "לא נבחרו תלמידים.";
+      return;
+    }
+    const ids = checked.map(cb => Number(cb.dataset.id));
+    const chosen = studentRecords.filter(r => ids.includes(r.id));
+    if (!chosen.length) {
+      selectedAvgSummaryEl.textContent = "לא נמצאו רשומות מתאימות.";
+      return;
+    }
+
+    let sum = 0;
+    let min = Infinity;
+    let max = -Infinity;
+
+    chosen.forEach(rec => {
+      const s = Number(rec.score) || 0;
+      sum += s;
+      if (s < min) min = s;
+      if (s > max) max = s;
+    });
+
+    const avg = sum / chosen.length;
+    selectedAvgSummaryEl.textContent =
+      `קבוצה מסומנת: ${chosen.length} תלמידים. ממוצע: ${avg.toFixed(1)}. גבוה: ${max}. נמוך: ${min}.`;
+  });
+
+  // CSV
+  function escapeForCSV(value) {
+    if (value == null) return "";
+    const str = String(value).replace(/"/g, '""');
+    return `"${str}"`;
+  }
+
+  document.getElementById("export-csv-btn").addEventListener("click", () => {
+    if (!studentRecords.length) {
+      saveMessage.textContent = "אין תלמידים לייצא.";
+      return;
+    }
+
+    const headers = [
+      "שם",
+      "כיתה",
+      "מגמה",
+      "תפקיד",
+      "ציון",
+      "רמה",
+      "תאריך",
+      "הערות מורה"
+    ];
+
+    const rows = [];
+    rows.push(headers.map(escapeForCSV).join(","));
+
+    studentRecords.forEach(rec => {
+      const row = [
+        rec.name || "",
+        rec.className || "",
+        rec.track || "כללי",
+        rec.role || "",
+        rec.score != null ? rec.score : "",
+        levelFromScore(rec.score || 0),
+        rec.date || "",
+        rec.notes || ""
+      ];
+      rows.push(row.map(escapeForCSV).join(","));
+    });
+
+    const csvContent = rows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "ai_rubric_students.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    saveMessage.textContent = "קובץ CSV נוצר ונשמר במחשב.";
+  });
+
+  // שמירת מצב
+  function saveCurrentState() {
+    try {
+      const rubricSelections = {};
       criteriaData.forEach(crit => {
         const select = document.querySelector(`select[data-crit-id="${crit.id}"]`);
-        if (!select || select.value === "") {
-          allSelected = false;
-        }
+        rubricSelections[crit.id] = select ? select.value : "";
       });
 
-      if (!allSelected) {
-        saveMessage.textContent = "כדי לשמור תלמיד, יש לבחור רמת ביצוע בכל הקריטריונים.";
-        return;
+      const studentRanges = {};
+      studentScalesContainer.querySelectorAll('input[type="range"]').forEach(r => {
+        studentRanges[r.dataset.critId] = r.value;
+      });
+
+      const state = {
+        role: teacherView.style.display === "none" ? "student" : "teacher",
+        rubricSelections,
+        studentRanges,
+        form: {
+          name: document.getElementById("student-name").value.trim(),
+          className: document.getElementById("student-class").value.trim(),
+          track: document.getElementById("student-track").value,
+          role: document.getElementById("student-role").value,
+          notes: document.getElementById("teacher-notes").value.trim()
+        }
+      };
+
+      localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(state));
+    } catch {}
+  }
+
+  function loadCurrentState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_STATE);
+      if (!raw) return;
+      const state = JSON.parse(raw);
+      if (!state || typeof state !== "object") return;
+
+      if (state.role === "student") {
+        setRole("student", true);
+      } else {
+        setRole("teacher", true);
       }
 
-      if (currentTotalScore === 0) {
+      if (state.rubricSelections) {
+        criteriaData.forEach(crit => {
+          const select = document.querySelector(`select[data-crit-id="${crit.id}"]`);
+          if (select && state.rubricSelections[crit.id] != null) {
+            select.value = state.rubricSelections[crit.id];
+          }
+        });
         calculateTotal(true);
       }
 
-      const now = new Date();
-      const dateStr = now.toLocaleDateString("he-IL", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit"
-      });
-
-      const record = {
-        id: Date.now(),
-        name,
-        className,
-        track: track || "כללי",
-        role,
-        score: currentTotalScore,
-        date: dateStr,
-        notes
-      };
-
-      studentRecords.push(record);
-      saveRecordsToStorage();
-      renderRecordsTable();
-
-      saveMessage.textContent = "התלמיד נשמר בהצלחה.";
-
-      document.getElementById("student-name").value = "";
-      document.getElementById("student-class").value = "";
-      document.getElementById("teacher-notes").value = "";
-
-      saveCurrentState();
-    });
-
-    document.getElementById("clear-students-btn").addEventListener("click", () => {
-      if (!studentRecords.length) {
-        saveMessage.textContent = "אין רשומה למחיקה.";
-        return;
+      if (state.studentRanges) {
+        studentScalesContainer.querySelectorAll('input[type="range"]').forEach(r => {
+          const v = state.studentRanges[r.dataset.critId];
+          if (v != null) {
+            r.value = v;
+            const label = document.getElementById(`student-val-${r.dataset.critId}`);
+            if (label) label.textContent = interpretScaleValue(v);
+          }
+        });
+        updateStudentAverage(true);
       }
-      const confirmDelete = window.confirm("האם את בטוחה שברצונך למחוק את כל רשימת התלמידים?");
-      if (!confirmDelete) return;
 
-      studentRecords = [];
-      saveRecordsToStorage();
-      renderRecordsTable();
-      saveMessage.textContent = "כל הרשימה נמחקה.";
-    });
-	document.getElementById("export-csv-btn").addEventListener("click", () => {
-  if (!studentRecords.length) {
-    saveMessage.textContent = "אין תלמידים לייצא.";
-    return;
+      if (state.form) {
+        document.getElementById("student-name").value = state.form.name || "";
+        document.getElementById("student-class").value = state.form.className || "";
+        document.getElementById("student-track").value = state.form.track || "";
+        document.getElementById("student-role").value = state.form.role || "עבודה אישית";
+        document.getElementById("teacher-notes").value = state.form.notes || "";
+      }
+    } catch {}
   }
 
-  const headers = [
-    "שם",
-    "כיתה",
-    "מגמה",
-    "תפקיד",
-    "ציון",
-    "רמה",
-    "תאריך",
-    "הערות מורה"
-  ];
+  document.getElementById("student-name").addEventListener("input", saveCurrentState);
+  document.getElementById("student-class").addEventListener("input", saveCurrentState);
+  document.getElementById("student-track").addEventListener("change", saveCurrentState);
+  document.getElementById("student-role").addEventListener("change", saveCurrentState);
+  document.getElementById("teacher-notes").addEventListener("input", saveCurrentState);
 
-  const rows = [];
-  rows.push(headers.map(escapeForCSV).join(","));
-
-  studentRecords.forEach(rec => {
-    const row = [
-      rec.name || "",
-      rec.className || "",
-      rec.track || "כללי",
-      rec.role || "",
-      rec.score != null ? rec.score : "",
-      levelFromScore(rec.score || 0),
-      rec.date || "",
-      rec.notes || ""
-    ];
-    rows.push(row.map(escapeForCSV).join(","));
-  });
-
-  const csvContent = rows.join("\n");
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "ai_rubric_students.csv";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-
-  saveMessage.textContent = "קובץ CSV נוצר ונשמר במחשב.";
-});
-
-
-    filterClassSelect.addEventListener("change", () => {
-      currentFilterClass = filterClassSelect.value;
-      renderRecordsTable();
-    });
-
-    filterTrackSelect.addEventListener("change", () => {
-      currentFilterTrack = filterTrackSelect.value;
-      renderRecordsTable();
-    });
-
-    // מחיקת תלמיד בודד
-    studentsTbody.addEventListener("click", event => {
-      if (!event.target.classList.contains("delete-student-btn")) return;
-      const id = Number(event.target.dataset.id);
-      const rec = studentRecords.find(r => r.id === id);
-      const name = rec ? rec.name : "";
-      const ok = window.confirm(`למחוק את הרשומה של "${name || "תלמיד"}"?`);
-      if (!ok) return;
-      studentRecords = studentRecords.filter(r => r.id !== id);
-      saveRecordsToStorage();
-      renderRecordsTable();
-      saveMessage.textContent = "הרשומה נמחקה.";
-    });
-
-    // ממוצע לקבוצה מסומנת
-    selectedAvgBtn.addEventListener("click", () => {
-      const checked = Array.from(document.querySelectorAll(".row-select:checked"));
-      if (!checked.length) {
-        selectedAvgSummaryEl.textContent = "לא נבחרו תלמידים.";
-        return;
-      }
-      const ids = checked.map(cb => Number(cb.dataset.id));
-      const chosen = studentRecords.filter(r => ids.includes(r.id));
-      if (!chosen.length) {
-        selectedAvgSummaryEl.textContent = "לא נמצאו רשומות מתאימות.";
-        return;
-      }
-
-      let sum = 0;
-      let min = Infinity;
-      let max = -Infinity;
-      chosen.forEach(rec => {
-        const s = Number(rec.score) || 0;
-        sum += s;
-        if (s < min) min = s;
-        if (s > max) max = s;
-      });
-      const avg = sum / chosen.length;
-
-      selectedAvgSummaryEl.textContent =
-        `קבוצה מסומנת: ${chosen.length} תלמידים. ממוצע: ${avg.toFixed(1)}. גבוה: ${max}. נמוך: ${min}.`;
-    });
-
-    // שמירת מצב המחוון והטופס
-    function saveCurrentState() {
-      try {
-        const rubricSelections = {};
-        criteriaData.forEach(crit => {
-          const select = document.querySelector(`select[data-crit-id="${crit.id}"]`);
-          rubricSelections[crit.id] = select ? select.value : "";
-        });
-
-        const studentRanges = {};
-        studentScalesContainer.querySelectorAll('input[type="range"]').forEach(r => {
-          studentRanges[r.dataset.critId] = r.value;
-        });
-
-        const state = {
-          role: teacherView.style.display === "none" ? "student" : "teacher",
-          rubricSelections,
-          studentRanges,
-          form: {
-            name: document.getElementById("student-name").value.trim(),
-            className: document.getElementById("student-class").value.trim(),
-            track: document.getElementById("student-track").value,
-            role: document.getElementById("student-role").value,
-            notes: document.getElementById("teacher-notes").value.trim()
-          }
-        };
-
-        localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(state));
-      } catch {}
+  // PDF אמיתי
+  document.getElementById("generate-pdf-btn").addEventListener("click", () => {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert("ספריית PDF לא נטענה. נסי לרענן את העמוד כאשר יש חיבור אינטרנט.");
+      return;
     }
 
-    function loadCurrentState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY_STATE);
-        if (!raw) return;
-        const state = JSON.parse(raw);
-        if (!state || typeof state !== "object") return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("p", "mm", "a4");
 
-        if (state.role === "student") {
-          setRole("student", true);
-        } else {
-          setRole("teacher", true);
-        }
+    const name = document.getElementById("student-name").value.trim() || "ללא שם";
+    const className = document.getElementById("student-class").value.trim() || "";
+    const track = document.getElementById("student-track").value || "כללי";
+    const role = document.getElementById("student-role").value || "";
+    const notes = document.getElementById("teacher-notes").value.trim() || "";
+    const totalScore = currentTotalScore;
+    const level = levelFromScore(totalScore);
 
-        if (state.rubricSelections) {
-          criteriaData.forEach(crit => {
-            const select = document.querySelector(`select[data-crit-id="${crit.id}"]`);
-            if (select && state.rubricSelections[crit.id] != null) {
-              select.value = state.rubricSelections[crit.id];
-            }
-          });
-          calculateTotal(true);
-        }
+    let y = 15;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("דוח מחוון עבודה עם כלי בינה מלאכותית", 105, y, { align: "center" });
 
-        if (state.studentRanges) {
-          studentScalesContainer.querySelectorAll('input[type="range"]').forEach(r => {
-            const v = state.studentRanges[r.dataset.critId];
-            if (v != null) {
-              r.value = v;
-              const label = document.getElementById(`student-val-${r.dataset.critId}`);
-              if (label) label.textContent = interpretScaleValue(v);
-            }
-          });
-          updateStudentAverage(true);
-        }
+    y += 10;
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text(`שם התלמיד או התלמידה: ${name}`, 10, y);
+    y += 7;
+    doc.text(`כיתה: ${className}    מגמה: ${track}`, 10, y);
+    y += 7;
+    doc.text(`סוג עבודה: ${role}`, 10, y);
+    y += 7;
+    doc.text(`ציון כולל: ${totalScore}    רמת הערכה: ${level}`, 10, y);
 
-        if (state.form) {
-          document.getElementById("student-name").value = state.form.name || "";
-          document.getElementById("student-class").value = state.form.className || "";
-          document.getElementById("student-track").value = state.form.track || "";
-          document.getElementById("student-role").value = state.form.role || "עבודה אישית";
-          document.getElementById("teacher-notes").value = state.form.notes || "";
-        }
-      } catch {}
-    }
+    y += 10;
+    doc.setFont("helvetica", "bold");
+    doc.text("פירוט לפי קריטריונים:", 10, y);
+    y += 6;
+    doc.setFont("helvetica", "normal");
 
-    document.getElementById("student-name").addEventListener("input", saveCurrentState);
-    document.getElementById("student-class").addEventListener("input", saveCurrentState);
-    document.getElementById("student-track").addEventListener("change", saveCurrentState);
-    document.getElementById("student-role").addEventListener("change", saveCurrentState);
-    document.getElementById("teacher-notes").addEventListener("input", saveCurrentState);
-
-    // PDF אמיתי
-    document.getElementById("generate-pdf-btn").addEventListener("click", () => {
-      if (!window.jspdf || !window.jspdf.jsPDF) {
-        alert("ספריית PDF לא נטענה. נסי לרענן את העמוד כאשר יש חיבור אינטרנט.");
-        return;
+    criteriaData.forEach(crit => {
+      const select = document.querySelector(`select[data-crit-id="${crit.id}"]`);
+      let levelLabel = "לא נבחר";
+      let points = 0;
+      if (select && select.value !== "") {
+        const lvl = crit.levels[Number(select.value)];
+        levelLabel = lvl.label;
+        points = lvl.points;
       }
+      const line = `${crit.name} - רמה: ${levelLabel}, נקודות: ${points}/${crit.max}`;
+      const split = doc.splitTextToSize(line, 180);
+      if (y + split.length * 6 > 280) {
+        doc.addPage();
+        y = 15;
+      }
+      doc.text(split, 10, y);
+      y += split.length * 6;
+    });
 
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF("p", "mm", "a4");
-
-      const name = document.getElementById("student-name").value.trim() || "ללא שם";
-      const className = document.getElementById("student-class").value.trim() || "";
-      const track = document.getElementById("student-track").value || "כללי";
-      const role = document.getElementById("student-role").value || "";
-      const notes = document.getElementById("teacher-notes").value.trim() || "";
-      const totalScore = currentTotalScore;
-      const level = levelFromScore(totalScore);
-
-      let y = 15;
+    if (notes) {
+      if (y + 20 > 280) {
+        doc.addPage();
+        y = 15;
+      }
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(16);
-      doc.text("דוח מחוון עבודה עם כלי בינה מלאכותית", 105, y, { align: "center" });
-
-      y += 10;
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "normal");
-      doc.text(`שם התלמיד או התלמידה: ${name}`, 10, y);
-      y += 7;
-      doc.text(`כיתה: ${className}    מגמה: ${track}`, 10, y);
-      y += 7;
-      doc.text(`סוג עבודה: ${role}`, 10, y);
-      y += 7;
-      doc.text(`ציון כולל: ${totalScore}    רמת הערכה: ${level}`, 10, y);
-
-      y += 10;
-      doc.setFont("helvetica", "bold");
-      doc.text("פירוט לפי קריטריונים:", 10, y);
+      doc.text("הערות מורה:", 10, y);
       y += 6;
       doc.setFont("helvetica", "normal");
-
-      criteriaData.forEach(crit => {
-        const select = document.querySelector(`select[data-crit-id="${crit.id}"]`);
-        let levelLabel = "לא נבחר";
-        let points = 0;
-        if (select && select.value !== "") {
-          const lvl = crit.levels[Number(select.value)];
-          levelLabel = lvl.label;
-          points = lvl.points;
-        }
-        const line = `${crit.name} - רמה: ${levelLabel}, נקודות: ${points}/${crit.max}`;
-        const split = doc.splitTextToSize(line, 180);
-        if (y + split.length * 6 > 280) {
-          doc.addPage();
-          y = 15;
-        }
-        doc.text(split, 10, y);
-        y += split.length * 6;
-      });
-
-      if (notes) {
-        if (y + 20 > 280) {
-          doc.addPage();
-          y = 15;
-        }
-        doc.setFont("helvetica", "bold");
-        doc.text("הערות מורה:", 10, y);
-        y += 6;
-        doc.setFont("helvetica", "normal");
-        const splitNotes = doc.splitTextToSize(notes, 180);
-        doc.text(splitNotes, 10, y);
-      }
-
-      const fileName = `מחוון_${name.replace(/\s+/g,"_") || "תלמיד"}.pdf`;
-      doc.save(fileName);
-    });
-
-    loadCurrentState();
-
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js").catch(() => {});
+      const splitNotes = doc.splitTextToSize(notes, 180);
+      doc.text(splitNotes, 10, y);
     }
-  </script>
+
+    const fileName = `מחוון_${name.replace(/\s+/g,"_") || "תלמיד"}.pdf`;
+    doc.save(fileName);
+  });
+
+  loadCurrentState();
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+</script>
+
 </body>
 </html>
 
