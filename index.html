@@ -1197,7 +1197,7 @@ button.small {
       rows.push(row.map(escapeForCSV).join(","));
     });
 
-    const csvContent = rows.join("\n");
+const csvContent = "\uFEFF" + rows.join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
 
