@@ -105,6 +105,15 @@
       background: #b71c1c;
       color: #fff;
     }
+	button.small {
+  font-size: 0.8rem;
+  padding: 0.2rem 0.5rem;
+}
+	
+button.small {
+  font-size: 0.8rem;
+  padding: 0.2rem 0.5rem;
+}
 
     button.small {
       font-size: 0.8rem;
@@ -443,8 +452,16 @@
           <div class="muted" id="stats-summary">
             ממוצע כיתתי ומגמתי יוצג כאן לאחר שמירת תלמידים.
           </div>
+		  <div class="controls-row" style="margin-top:0.8rem;">
+  <button id="selected-avg-btn" type="button" class="secondary">ממוצע לקבוצה מסומנת</button>
+  <span id="selected-avg-summary" class="muted"></span>
+</div>
         </div>
       </div>
+<div class="controls-row" style="margin-top:0.8rem;">
+  <button id="selected-avg-btn" type="button" class="secondary">ממוצע לקבוצה מסומנת</button>
+  <span id="selected-avg-summary" class="muted"></span>
+</div>
 
       <div class="controls-row" style="margin-top:0.8rem;">
         <button id="selected-avg-btn" type="button" class="secondary">ממוצע לקבוצה מסומנת</button>
@@ -452,20 +469,22 @@
       </div>
 
       <table id="students-table">
-        <thead>
-          <tr>
-            <th>בחר</th>
-            <th>שם</th>
-            <th>כיתה</th>
-            <th>מגמה</th>
-            <th>תפקיד</th>
-            <th>ציון</th>
-            <th>רמה</th>
-            <th>תאריך</th>
-            <th>הערות מורה</th>
-            <th>מחיקה</th>
-          </tr>
-        </thead>
+	  <thead>
+  <tr>
+    <th>בחר</th>
+    <th>שם</th>
+    <th>כיתה</th>
+    <th>מגמה</th>
+    <th>תפקיד</th>
+    <th>ציון</th>
+    <th>רמה</th>
+    <th>תאריך</th>
+    <th>הערות מורה</th>
+    <th>מחיקה</th>
+  </tr>
+</thead>
+
+
         <tbody id="students-tbody">
         </tbody>
       </table>
@@ -580,6 +599,8 @@
     const statsSummaryEl = document.getElementById("stats-summary");
     const selectedAvgBtn = document.getElementById("selected-avg-btn");
     const selectedAvgSummaryEl = document.getElementById("selected-avg-summary");
+	const selectedAvgBtn = document.getElementById("selected-avg-btn");
+const selectedAvgSummaryEl = document.getElementById("selected-avg-summary");
 
     const teacherBtn = document.getElementById("role-teacher");
     const studentBtn = document.getElementById("role-student");
@@ -936,66 +957,116 @@
         return;
       }
 
-      filtered.forEach(rec => {
-        const tr = document.createElement("tr");
-        tr.dataset.id = rec.id;
+filtered.forEach(rec => {
+  const tr = document.createElement("tr");
+  tr.dataset.id = rec.id;
 
-        const tdSelect = document.createElement("td");
-        const cb = document.createElement("input");
-        cb.type = "checkbox";
-        cb.className = "row-select";
-        cb.dataset.id = rec.id;
-        tdSelect.appendChild(cb);
-        tr.appendChild(tdSelect);
+  // תא בחירה
+  const tdSelect = document.createElement("td");
+  const cb = document.createElement("input");
+  cb.type = "checkbox";
+  cb.className = "row-select";
+  cb.dataset.id = rec.id;
+  tdSelect.appendChild(cb);
+  tr.appendChild(tdSelect);
 
-        const tdName = document.createElement("td");
-        tdName.textContent = rec.name || "";
-        tr.appendChild(tdName);
+  const tdName = document.createElement("td");
+  tdName.textContent = rec.name || "";
+  tr.appendChild(tdName);
 
-        const tdClass = document.createElement("td");
-        tdClass.textContent = rec.className || "";
-        tr.appendChild(tdClass);
+  const tdClass = document.createElement("td");
+  tdClass.textContent = rec.className || "";
+  tr.appendChild(tdClass);
 
-        const tdTrack = document.createElement("td");
-        tdTrack.textContent = rec.track || "כללי";
-        tr.appendChild(tdTrack);
+  const tdTrack = document.createElement("td");
+  tdTrack.textContent = rec.track || "כללי";
+  tr.appendChild(tdTrack);
 
-        const tdRole = document.createElement("td");
-        tdRole.textContent = rec.role || "";
-        tr.appendChild(tdRole);
+  const tdRole = document.createElement("td");
+  tdRole.textContent = rec.role || "";
+  tr.appendChild(tdRole);
 
-        const tdScore = document.createElement("td");
-        tdScore.textContent = rec.score != null ? rec.score : "";
-        tr.appendChild(tdScore);
+  const tdScore = document.createElement("td");
+  tdScore.textContent = rec.score != null ? rec.score : "";
+  tr.appendChild(tdScore);
 
-        const tdLevel = document.createElement("td");
-        tdLevel.textContent = levelFromScore(rec.score || 0);
-        tr.appendChild(tdLevel);
+  const tdLevel = document.createElement("td");
+  tdLevel.textContent = levelFromScore(rec.score || 0);
+  tr.appendChild(tdLevel);
 
-        const tdDate = document.createElement("td");
-        tdDate.textContent = rec.date || "";
-        tr.appendChild(tdDate);
+  const tdDate = document.createElement("td");
+  tdDate.textContent = rec.date || "";
+  tr.appendChild(tdDate);
 
-        const tdNotes = document.createElement("td");
-        tdNotes.textContent = rec.notes || "";
-        tr.appendChild(tdNotes);
+  const tdNotes = document.createElement("td");
+  tdNotes.textContent = rec.notes || "";
+  tr.appendChild(tdNotes);
 
-        const tdDelete = document.createElement("td");
-        const delBtn = document.createElement("button");
-        delBtn.textContent = "מחיקה";
-        delBtn.className = "danger small delete-student-btn";
-        delBtn.dataset.id = rec.id;
-        tdDelete.appendChild(delBtn);
-        tr.appendChild(tdDelete);
+  // תא מחיקה
+  const tdDelete = document.createElement("td");
+  const delBtn = document.createElement("button");
+  delBtn.textContent = "מחיקה";
+  delBtn.className = "danger small delete-student-btn";
+  delBtn.dataset.id = rec.id;
+  tdDelete.appendChild(delBtn);
+  tr.appendChild(tdDelete);
 
-        studentsTbody.appendChild(tr);
-      });
+  studentsTbody.appendChild(tr);
+});
+
 
       updateStatsSummary(filtered);
     }
 
     loadRecordsFromStorage();
     renderRecordsTable();
+	
+	// מחיקת תלמיד בודד
+studentsTbody.addEventListener("click", event => {
+  if (!event.target.classList.contains("delete-student-btn")) return;
+
+  const id = Number(event.target.dataset.id);
+  const rec = studentRecords.find(r => r.id === id);
+  const name = rec ? rec.name : "";
+  const ok = window.confirm(`למחוק את הרשומה של "${name || "תלמיד"}"?`);
+  if (!ok) return;
+
+  studentRecords = studentRecords.filter(r => r.id !== id);
+  saveRecordsToStorage();
+  renderRecordsTable();
+  saveMessage.textContent = "הרשומה נמחקה.";
+});
+
+selectedAvgBtn.addEventListener("click", () => {
+  const checked = Array.from(document.querySelectorAll(".row-select:checked"));
+  if (!checked.length) {
+    selectedAvgSummaryEl.textContent = "לא נבחרו תלמידים.";
+    return;
+  }
+
+  const ids = checked.map(cb => Number(cb.dataset.id));
+  const chosen = studentRecords.filter(r => ids.includes(r.id));
+  if (!chosen.length) {
+    selectedAvgSummaryEl.textContent = "לא נמצאו רשומות מתאימות.";
+    return;
+  }
+
+  let sum = 0;
+  let min = Infinity;
+  let max = -Infinity;
+
+  chosen.forEach(rec => {
+    const s = Number(rec.score) || 0;
+    sum += s;
+    if (s < min) min = s;
+    if (s > max) max = s;
+  });
+
+  const avg = sum / chosen.length;
+  selectedAvgSummaryEl.textContent =
+    `קבוצה מסומנת: ${chosen.length} תלמידים. ממוצע: ${avg.toFixed(1)}. גבוה: ${max}. נמוך: ${min}.`;
+});
+
 
     document.getElementById("save-student-btn").addEventListener("click", () => {
       const name = document.getElementById("student-name").value.trim();
@@ -1292,3 +1363,4 @@
   </script>
 </body>
 </html>
+
