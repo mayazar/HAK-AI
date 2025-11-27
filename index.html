@@ -939,6 +939,12 @@ const selectedAvgSummaryEl = document.getElementById("selected-avg-summary");
         `הקשר: ${context}. מספר תלמידים: ${filtered.length}. ממוצע ציון: ${avg.toFixed(1)}. ` +
         `ציון גבוה: ${max}. ציון נמוך: ${min}.`;
     }
+	
+function escapeForCSV(value) {
+  if (value == null) return "";
+  const str = String(value).replace(/"/g, '""');
+  return `"${str}"`;
+}
 
     function renderRecordsTable() {
       studentsTbody.innerHTML = "";
@@ -1143,6 +1149,55 @@ selectedAvgBtn.addEventListener("click", () => {
       renderRecordsTable();
       saveMessage.textContent = "כל הרשימה נמחקה.";
     });
+	document.getElementById("export-csv-btn").addEventListener("click", () => {
+  if (!studentRecords.length) {
+    saveMessage.textContent = "אין תלמידים לייצא.";
+    return;
+  }
+
+  const headers = [
+    "שם",
+    "כיתה",
+    "מגמה",
+    "תפקיד",
+    "ציון",
+    "רמה",
+    "תאריך",
+    "הערות מורה"
+  ];
+
+  const rows = [];
+  rows.push(headers.map(escapeForCSV).join(","));
+
+  studentRecords.forEach(rec => {
+    const row = [
+      rec.name || "",
+      rec.className || "",
+      rec.track || "כללי",
+      rec.role || "",
+      rec.score != null ? rec.score : "",
+      levelFromScore(rec.score || 0),
+      rec.date || "",
+      rec.notes || ""
+    ];
+    rows.push(row.map(escapeForCSV).join(","));
+  });
+
+  const csvContent = rows.join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "ai_rubric_students.csv";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  saveMessage.textContent = "קובץ CSV נוצר ונשמר במחשב.";
+});
+
 
     filterClassSelect.addEventListener("change", () => {
       currentFilterClass = filterClassSelect.value;
