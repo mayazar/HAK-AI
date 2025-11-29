@@ -1308,8 +1308,7 @@ const csvContent = "\uFEFF" + rows.join("\n");
   const doc = new jsPDF("p", "mm", "a4");
 
   // שימוש ב Alef כברירת מחדל
-  doc.setFont("Alef-Regular", "normal");
-
+doc.setFont("Alef", "normal");
   // עטיפה אוטומטית לכל הטקסטים כדי שיצאו בעברית (ימין לשמאל)
   const originalText = doc.text.bind(doc);
   doc.text = function (text, x, y, options) {
@@ -1346,7 +1345,7 @@ doc.text("דוח מחוון עבודה עם כלי בינה מלאכותית", 1
 
     y += 10;
     doc.setFontSize(11);
-doc.setFont("Alef-Regular", "normal");
+doc.setFont("Alef", "normal");
     doc.text(`שם התלמיד או התלמידה: ${name}`, 10, y);
     y += 7;
     doc.text(`כיתה: ${className}    מגמה: ${track}`, 10, y);
@@ -1359,8 +1358,7 @@ doc.setFont("Alef-Regular", "normal");
 doc.setFont("Alef", "bold");
     doc.text("פירוט לפי קריטריונים:", 10, y);
     y += 6;
-doc.setFont("Alef-Regular", "normal");
-
+doc.setFont("Alef", "normal");
     criteriaData.forEach(crit => {
       const select = document.querySelector(`select[data-crit-id="${crit.id}"]`);
       let levelLabel = "לא נבחר";
@@ -1388,7 +1386,7 @@ doc.setFont("Alef-Regular", "normal");
 doc.setFont("Alef", "bold");
       doc.text("הערות מורה:", 10, y);
       y += 6;
-doc.setFont("Alef-Regular", "normal");
+doc.setFont("Alef", "normal");
       const splitNotes = doc.splitTextToSize(notes, 180);
       doc.text(splitNotes, 10, y);
     }

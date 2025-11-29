@@ -6,4 +6,4 @@
   
   jsPDFAPI.addFileToVFS('Alef-Regular.ttf', font);
   jsPDFAPI.addFont('Alef-Regular.ttf', 'Alef', 'normal');
-})(jsPDF.API);
+})(window.jspdf && window.jspdf.jsPDF ? window.jspdf.jsPDF.API : (window.jsPDF ? window.jsPDF.API : null));

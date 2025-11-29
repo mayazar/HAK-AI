@@ -5,4 +5,4 @@
   
   jsPDFAPI.addFileToVFS('Alef-Bold.ttf', font);
   jsPDFAPI.addFont('Alef-Bold.ttf', 'Alef', 'bold');
-})(jsPDF.API);
+})(window.jspdf && window.jspdf.jsPDF ? window.jspdf.jsPDF.API : (window.jsPDF ? window.jsPDF.API : null));
