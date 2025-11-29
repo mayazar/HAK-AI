@@ -1,9 +1,21 @@
 // Alef Regular font for jsPDF (Base64)
-(function (jsPDFAPI) {
-  var font = 'AAEAAAASAQAABAAgR0RFRrRCsIIAAAC8AAA ... '; 
-  // *** הקובץ המלא גדול מדי להדבקה כאן ***
-  // אני אעלה אותו לך כקובץ מוכן להורדה בהודעה הבאה.
-  
+(function (root) {
+
+  // מוצאים את API של jsPDF בצורה בטוחה
+  var jsPDFAPI =
+    root && root.jspdf && root.jspdf.jsPDF
+      ? root.jspdf.jsPDF.API
+      : (root && root.jsPDF ? root.jsPDF.API : null);
+
+  if (!jsPDFAPI) {
+    console.error("jsPDF not loaded – Alef Regular font not registered");
+    return;
+  }
+
+  // *** כאן שימי את המחרוזת הארוכה של הפונט ***
+  var font = 'AAEAAAASAQAABAAgR0RFRrRCsIIAAAC8AAA...הפונט_שלך...';
+
   jsPDFAPI.addFileToVFS('Alef-Regular.ttf', font);
   jsPDFAPI.addFont('Alef-Regular.ttf', 'Alef', 'normal');
-})(window.jspdf && window.jspdf.jsPDF ? window.jspdf.jsPDF.API : (window.jsPDF ? window.jsPDF.API : null));
+
+})(typeof window !== "undefined" ? window : this);
