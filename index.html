@@ -1306,6 +1306,16 @@ const csvContent = "\uFEFF" + rows.join("\n");
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF("p", "mm", "a4");
+  
+   // רישום הפונטים מהקבצים alef-regular.js ו-alef-bold.js
+  if (typeof AlefRegular === "string") {
+    doc.addFileToVFS("Alef-Regular.ttf", AlefRegular);
+    doc.addFont("Alef-Regular.ttf", "Alef", "normal");
+  }
+  if (typeof AlefBold === "string") {
+    doc.addFileToVFS("Alef-Bold.ttf", AlefBold);
+    doc.addFont("Alef-Bold.ttf", "Alef", "bold");
+  }
 
   // שימוש ב Alef כברירת מחדל
 doc.setFont("Alef", "normal");
